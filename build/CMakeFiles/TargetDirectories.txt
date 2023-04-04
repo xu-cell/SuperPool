@@ -1,0 +1,3 @@
+/home/ecs-user/SuperPool/build/CMakeFiles/rebuild_cache.dir
+/home/ecs-user/SuperPool/build/CMakeFiles/edit_cache.dir
+/home/ecs-user/SuperPool/build/CMakeFiles/SuperPool.dir
