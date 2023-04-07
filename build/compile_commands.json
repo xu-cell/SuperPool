@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/ecs-user/SuperPool/build",
-  "command": "/usr/bin/g++  -DSuperPool_EXPORTS -I../include   -g -std=c++14 -g -fPIC   -o CMakeFiles/SuperPool.dir/src/threadpool.cc.o -c /home/ecs-user/SuperPool/src/threadpool.cc",
+  "command": "/usr/bin/g++  -DSuperPool_EXPORTS -I../include   -g -std=c++17 -g -fPIC   -o CMakeFiles/SuperPool.dir/src/threadpool.cc.o -c /home/ecs-user/SuperPool/src/threadpool.cc",
   "file": "/home/ecs-user/SuperPool/src/threadpool.cc"
 }
 ]

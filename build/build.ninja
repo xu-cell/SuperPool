@@ -64,7 +64,7 @@ build cmake_object_order_depends_target_SuperPool: phony || CMakeFiles/SuperPool
 build CMakeFiles/SuperPool.dir/src/threadpool.cc.o: CXX_COMPILER__SuperPool ../src/threadpool.cc || cmake_object_order_depends_target_SuperPool
   DEFINES = -DSuperPool_EXPORTS
   DEP_FILE = CMakeFiles/SuperPool.dir/src/threadpool.cc.o.d
-  FLAGS = -g -std=c++14 -g -fPIC
+  FLAGS = -g -std=c++17 -g -fPIC
   INCLUDES = -I../include
   OBJECT_DIR = CMakeFiles/SuperPool.dir
   OBJECT_FILE_DIR = CMakeFiles/SuperPool.dir/src
@@ -78,7 +78,7 @@ build CMakeFiles/SuperPool.dir/src/threadpool.cc.o: CXX_COMPILER__SuperPool ../s
 # Link the shared library libSuperPool.so
 
 build libSuperPool.so: CXX_SHARED_LIBRARY_LINKER__SuperPool CMakeFiles/SuperPool.dir/src/threadpool.cc.o
-  LANGUAGE_COMPILE_FLAGS = -g -std=c++14 -g
+  LANGUAGE_COMPILE_FLAGS = -g -std=c++17 -g
   OBJECT_DIR = CMakeFiles/SuperPool.dir
   POST_BUILD = :
   PRE_LINK = :
