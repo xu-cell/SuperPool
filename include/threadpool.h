@@ -145,7 +145,7 @@ public:
     ThreadPool();
     ~ThreadPool();
     void setThreadMaxThreshHold(int threadMaxThreshHold);
-    void start(size_t initThreadSize = 4);
+    void start(size_t initThreadSize =  std::thread::hardware_concurrency());
     void setTaskQueMaxThreshHold(size_t taskQueMaxThreshHold);
     Result submitTask(std::shared_ptr<Task> sp);
     void setMode(PoolMode mode);

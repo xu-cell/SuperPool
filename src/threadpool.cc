@@ -4,7 +4,7 @@
 #include <chrono>
 const int TASK_MAX_THRESHHOLD = 1024;
 const int THREAD_MAX_THRESHHOLD = 200;
-const int Thread_Max_IDLE_TIME = 10;
+const int Thread_Max_IDLE_TIME = 60;
 ThreadPool::ThreadPool()
     : initThreadSize_(0), taskSize_(0), taskQueMaxThreshHold_(TASK_MAX_THRESHHOLD), mode_(PoolMode::MODE_FIXED), isPoolRunning_(false), idleThreadSize_(0), threadSizeThreshHold_(THREAD_MAX_THRESHHOLD), curThreadSize_(0)
 {
@@ -12,8 +12,9 @@ ThreadPool::ThreadPool()
 ThreadPool::~ThreadPool()
 {
     isPoolRunning_ = false;
-    notEmpty_.notify_all();
+
     std::unique_lock<std::mutex> lock(taskQueMtx_);
+    notEmpty_.notify_all();
     exitcond_.wait(lock, [&]() -> bool
                    { return threads_.size() == 0; });
 }
@@ -73,7 +74,7 @@ Result ThreadPool::submitTask(std::shared_ptr<Task> sp)
         threads_[threadid]->start();
         idleThreadSize_++;
         curThreadSize_++;
-        std::cout << "线程 + 1" << std::endl;
+        // std::cout << "线程 + 1" << std::endl;
     }
 
     return Result(sp); // 理解对象的生存周期
@@ -95,10 +96,11 @@ void Thread::start()
 void ThreadPool::threadFunc(int threadId)
 {
     auto lastTime = std::chrono::high_resolution_clock().now();
-    while(isPoolRunning_)
+    for (;;)
     {
         std::shared_ptr<Task> task;
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             // 获取锁
             // std::cout << "tid: " << std::this_thread::get_id()
             //  << " 尝试获取任务... " << std::endl;
@@ -107,9 +109,15 @@ void ThreadPool::threadFunc(int threadId)
             // cache模式下，有可能创建了很多的任务？到某个线程空闲了超过60s时，我们
             // 应该回收多余的线程。
 
-            while (taskQue_.size() == 0)
+            while (taskQue_.size() == 0) // ！！！！锁加双重判断
             {
-                
+                if (!isPoolRunning_)
+                {
+                    threads_.erase(threadId);
+                    exitcond_.notify_all();
+                    std::cout << "thread exit" << std::endl;
+                    return;
+                }
                 if (mode_ == PoolMode::MODE_CACHED)
                 {
                     if (std::cv_status::timeout == notEmpty_.wait_for(lock, std::chrono::seconds(1)))
@@ -123,7 +131,7 @@ void ThreadPool::threadFunc(int threadId)
                             curThreadSize_--;
                             idleThreadSize_--;
                             threads_.erase(threadId); //
-                            std::cout << "线程 - 1" << std::endl;
+                            // std::cout << "线程 - 1" << std::endl;
                             return;
                         }
                     }
@@ -132,16 +140,15 @@ void ThreadPool::threadFunc(int threadId)
                 {
                     notEmpty_.wait(lock);
                 }
-                //线程池要结束
-                if(!isPoolRunning_)
-                {
-                    threads_.erase(threadId);
-                    std::cout << "thread exit" << std::endl;
-                    exitcond_.notify_one();
-                    return;
-                }
+                // //线程池要结束
+                // if(!isPoolRunning_)
+                // {
+                //     threads_.erase(threadId);
+                //     std::cout << "thread exit" << std::endl;
+                //     exitcond_.notify_one();
+                //     return;
+                // }
             }
-
 
             // 有任务来了
             idleThreadSize_--;
@@ -165,9 +172,6 @@ void ThreadPool::threadFunc(int threadId)
         idleThreadSize_++;
         lastTime = std::chrono::high_resolution_clock().now();
     }
-    threads_.erase(threadId);
-    exitcond_.notify_one();
-    std::cout << "thread exit" << std::endl;
 }
 Thread::Thread(ThreadFunc func)
     : func_(func), threadId_(generateId_++)
